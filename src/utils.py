@@ -33,6 +33,18 @@ def logging_config(folder=None, name=None,
     return folder
 
 
+def log_experiment_parameters(ARGS, logger):
+    """
+    to be used at the beginning of each experiment to capture exactly what hyperparameters the experiment used
+    :param ARGS: parsed arguments
+    :param logger: the logger that will log each arguemnt in ARGS at info level
+    :return: None
+    """
+    for argument, value in vars(ARGS).items():
+        logger.info(f"\t{argument:>20} = {value}")
+    return
+
+
 def format_epoch_updates(epoch_formatting_space=12,
                          train_loss_space=15.4,
                          train_acc_space=10.4,
