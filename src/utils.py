@@ -3,7 +3,11 @@ import os
 
 import mxnet as mx
 
-__all__ = ['logging_config', 'format_epoch_updates', 'check_for_gpu']
+__all__ = ['logging_config',
+           'log_experiment_parameters',
+           'format_epoch_updates',
+           'check_for_gpu',
+           ]
 
 
 def logging_config(folder=None, name=None,
