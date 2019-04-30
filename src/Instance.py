@@ -4,10 +4,10 @@ import mxnet as mx
 def process_text(words, vocab, max_len):
     indices = vocab[words]  ## map tokens (strings) to unique IDs
     indices = indices[:max_len]  ## truncate to max_len
-    # pad if necessary
-    while len(indices) < max_len:
-        indices.append(vocab['<pad>'])
-    assert len(indices) == max_len
+    # # pad if necessary
+    # while len(indices) < max_len:
+    #     indices.append(vocab['<pad>'])
+    # assert len(indices) == max_len
     return mx.nd.array(indices)
 
 
