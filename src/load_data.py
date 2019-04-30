@@ -104,7 +104,9 @@ def _preprocess(x, vocab, max_len):
     Outputs: data mapped to token IDs, with corresponding label
     """
     x.process_text(vocab, max_len)
-    return x.question_indices, x.context_indices, x.answers_indices, [a.start for a in x.answers]
+    return x.question_indices, \
+           x.context_indices, \
+           [a.start for a in x.answers]
     # label, ind1, ind2 = x
     # return label, ind1, ind2, indices_of_tokens
 
