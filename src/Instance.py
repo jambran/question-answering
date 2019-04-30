@@ -1,13 +1,8 @@
 import mxnet as mx
 
 
-def process_text(words, vocab, max_len):
+def process_text(words, vocab):
     indices = vocab[words]  ## map tokens (strings) to unique IDs
-    indices = indices[:max_len]  ## truncate to max_len
-    # # pad if necessary
-    # while len(indices) < max_len:
-    #     indices.append(vocab['<pad>'])
-    # assert len(indices) == max_len
     return mx.nd.array(indices)
 
 
@@ -36,15 +31,15 @@ class Instance:
         self.context = context
         self.title = title
 
-    def process_text(self, vocab, max_len):
+    def process_text(self, vocab):
         """
         get lists of the indices of the vocab items
         :param vocab: the mapping of vocab item to integer
         :param max_len: the max padding length
         :return: None
         """
-        self.question_indices = process_text(self.question, vocab, max_len)
-        self.context_indices = process_text(self.context, vocab, max_len)
+        self.question_indices = process_text(self.question, vocab)
+        self.context_indices = process_text(self.context, vocab)
 
 
 class Answer:

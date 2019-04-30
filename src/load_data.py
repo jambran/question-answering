@@ -38,14 +38,11 @@ def load_json_to_array(data_file: str):
 
 def load_dataset(train_file: str,
                  val_file: str,
-                 max_length: int = 32,
-                 source: str = None,
-                 ctx=mx.cpu()):
+                 source: str = None):
     """
     load all data sets into memory
     :param train_file: json format SQuAD data set
     :param val_file:  json format SQuAD data set
-    :param max_length: the max padding length for question, context and answer
     :param source: the source for word embeddings
     :param ctx: the CPU or GPU context
     :return:
@@ -53,10 +50,10 @@ def load_dataset(train_file: str,
     train_array = load_json_to_array(train_file)
     val_array = load_json_to_array(val_file)
 
-    vocabulary = build_vocabulary(train_array, val_array, source=source, context=ctx)
+    vocabulary = build_vocabulary(train_array, val_array, source=source)
 
-    train_dataset = preprocess_dataset(train_array, vocabulary, max_length)
-    val_dataset = preprocess_dataset(val_array, vocabulary, max_length)
+    train_dataset = preprocess_dataset(train_array, vocabulary)
+    val_dataset = preprocess_dataset(val_array, vocabulary)
 
     return vocabulary, train_dataset, val_dataset
 
@@ -102,18 +99,18 @@ def build_vocabulary(tr_array: List[Instance],
     return vocab
 
 
-def _preprocess(x: Instance, vocab: nlp.vocab, max_len: int):
+def _preprocess(x: Instance, vocab: nlp.vocab):
     """
     Inputs: data instance x (tokenized), vocabulary, maximum length of input (in tokens)
     Outputs: data mapped to token IDs, with corresponding label
     """
-    x.process_text(vocab, max_len)
+    x.process_text(vocab)
     answer_indices = mx.nd.array([a.start for a in x.answers])
     return x.question_indices, x.context_indices, answer_indices
 
 
-def preprocess_dataset(dataset: List[Instance], vocab: nlp.vocab, max_len: int):
-    preprocessed_dataset = [_preprocess(x, vocab, max_len) for x in dataset]
+def preprocess_dataset(dataset: List[Instance], vocab: nlp.vocab):
+    preprocessed_dataset = [_preprocess(x, vocab) for x in dataset]
     return preprocessed_dataset
 
 
