@@ -1,16 +1,15 @@
 # coding: utf-8
 
-import io
 import json
-from Instance import Instance
 
 import gluonnlp as nlp
 import mxnet as mx
 
-import utils
+from Instance import Instance
+from typing import List
 
 
-def load_json_to_array(data_file):
+def load_json_to_array(data_file: str):
     """
     load the data into memory
     :param data_file: the file path of the data to load in
@@ -37,7 +36,11 @@ def load_json_to_array(data_file):
     return arr
 
 
-def load_dataset(train_file, val_file, max_length=32, source=None, ctx=mx.cpu()):
+def load_dataset(train_file: str,
+                 val_file: str,
+                 max_length: int = 32,
+                 source: str = None,
+                 ctx=mx.cpu()):
     """
     load all data sets into memory
     :param train_file: json format SQuAD data set
@@ -58,7 +61,7 @@ def load_dataset(train_file, val_file, max_length=32, source=None, ctx=mx.cpu())
     return vocabulary, train_dataset, val_dataset
 
 
-def get_tokens_from(data_array):
+def get_tokens_from(data_array: List[Instance]):
     """
     :param data_array: a list of data instances as 4-tuples
     :return: combined list of tokens from each instance in the data set
@@ -77,8 +80,9 @@ def get_tokens_from(data_array):
     return all_tokens
 
 
-def build_vocabulary(tr_array, val_array, source,
-                     context=mx.cpu()):
+def build_vocabulary(tr_array: List[Instance],
+                     val_array: List[Instance],
+                     source: str) -> nlp.Vocab:
     """
     Inputs: arrays representing the training, validation and test data
     Outputs: vocabulary (Tokenized text as in-place modification of input arrays or returned as new arrays)
@@ -98,32 +102,32 @@ def build_vocabulary(tr_array, val_array, source,
     return vocab
 
 
-def _preprocess(x, vocab, max_len):
+def _preprocess(x: Instance, vocab: nlp.vocab, max_len: int):
     """
     Inputs: data instance x (tokenized), vocabulary, maximum length of input (in tokens)
     Outputs: data mapped to token IDs, with corresponding label
     """
     x.process_text(vocab, max_len)
-    return x.question_indices, \
-           x.context_indices, \
-           [a.start for a in x.answers]
-    # label, ind1, ind2 = x
-    # return label, ind1, ind2, indices_of_tokens
+    answer_indices = mx.nd.array([a.start for a in x.answers])
+    return x.question_indices, x.context_indices, answer_indices
 
 
-def preprocess_dataset(dataset, vocab, max_len):
+def preprocess_dataset(dataset: List[Instance], vocab: nlp.vocab, max_len: int):
     preprocessed_dataset = [_preprocess(x, vocab, max_len) for x in dataset]
     return preprocessed_dataset
 
 
-def tokenize(txt):
+def tokenize(txt: str):
     """
     Tokenize an input string. Something more sophisticated may help . . .
     """
     return [w.lower() for w in txt.split(' ')]
 
 
-def initialize_random_vectors_for(vocab, tokens=['<unk>', '<bos>', '<eos>'], mean=0, standard_dev=1):
+def initialize_random_vectors_for(vocab: nlp.vocab,
+                                  tokens: List[str] = ['<unk>', '<bos>', '<eos>'],
+                                  mean: float = 0,
+                                  standard_dev: float = 1):
     """
     randomly initializing weights for unknown words according to standard normal distribution
     :tokens: iterable of tokens to make randomly initialized vectors for
