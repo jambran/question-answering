@@ -3,6 +3,7 @@
 import math
 import os
 import numpy as np
+import logging
 
 import mxnet as mx
 from mxnet import gluon, autograd as ag
@@ -23,11 +24,14 @@ class QuestionAnsweringClassifier(HybridBlock):
         super(QuestionAnsweringClassifier, self).__init__()
         with self.name_scope():
             self.embedding = nn.Embedding(emb_input_dim, emb_output_dim)
-            self.bilstm = rnn.LSTM(hidden_size=2048,
-                                   dropout=dropout,
-                                   bidirectional=True,
-                                   # input_size=?,
-                                   )
+            self.bilstm_question = rnn.LSTM(hidden_size=2048,
+                                            dropout=dropout,
+                                            bidirectional=True,
+                                            )
+            self.bilstm_context = rnn.LSTM(hidden_size=2048,
+                                           dropout=dropout,
+                                           bidirectional=True,
+                                           )
             self.attention_transform = BaseEncoder(attention_cell=attn_cell,
                                                    num_layers=num_layers,
                                                    units=emb_output_dim,
@@ -46,16 +50,26 @@ class QuestionAnsweringClassifier(HybridBlock):
             with self.output.name_scope():
                 self.output.add(nn.Dense(num_classes))
 
-    def hybrid_forward(self, F, data, indices):
-        """
-        Inputs:
-         - data The sentence representation (token indices to feed to embedding layer)
-         - inds A vector - shape (2,) of two indices referring to positions of the two arguments
-        NOTE: Your implementation may involve a different approach
-        """
-        embedded = self.embedding(data)  ## shape (batch_size, length, emb_dim)
-        after_attn = self.attention_transform(embedded)  # shape ()
+    def hybrid_forward(self, F, question, context):
+        # embedding layers for question and context
+        question_embedded = self.embedding(question)  ## shape (batch_size, max_len, emb_dim)
+        context_embedded = self.embedding(context)
+        logging.debug(f"shape of question after embedding {question_embedded.shape}")
+        logging.debug(f"shape of context after embedding {context_embedded.shape}")
+
+        # bilstm layers for question and context
+        question_after_lstm = self.bilstm_question(question_embedded)
+        context_after_lstm = self.bilstm_context(context_embedded)
+        logging.debug(f"shape of question after lstm {question_after_lstm.shape}")
+        logging.debug(f"shape of context after lstm {context_after_lstm.shape}")
+
+        # attention layer
+        after_attn = self.attention_transform(question_after_lstm, context_after_lstm)
+        logging.debug(f"shape of after_attn {after_attn.shape}")
+
+        # output layer
         outputs = self.output(after_attn)
+        logging.debug(f"shape of outputs after output layer {outputs.shape}")
         return outputs
 
 
@@ -198,7 +212,7 @@ class BaseEncoderCell(HybridBlock):
                                        bias_initializer=bias_initializer)
             self.layer_norm = nn.LayerNorm()
 
-    def hybrid_forward(self, F, inputs):  # pylint: disable=arguments-differ
+    def hybrid_forward(self, F, query, key):  # pylint: disable=arguments-differ
         # pylint: disable=unused-argument
         """Transformer Encoder Attention Cell.
 
@@ -219,11 +233,11 @@ class BaseEncoderCell(HybridBlock):
         """
         # outputs has shape (batch_size, max_seq_len, units)
         # attention_weights has shape  (batch_size, 4, max_seq_len, max_seq_len)
-        outputs, attention_weights = self.attention_cell(inputs, inputs, None, None)
+        outputs, attention_weights = self.attention_cell(query, key, None, None)
         outputs = self.proj(outputs)  # shape (batch_size, max_seq_len, units)
         outputs = self.dropout_layer(outputs)  # shape (batch_size, max_seq_len, units)
-        if self._use_residual:
-            outputs = outputs + inputs
+        # if self._use_residual:
+        #     outputs = outputs + inputs
         outputs = self.layer_norm(outputs)
         outputs = self.ffn(outputs)
         return outputs
@@ -262,11 +276,9 @@ class BaseEncoder(HybridBlock):
         with self.name_scope():
             self.dropout_layer = nn.Dropout(dropout)
             self.layer_norm = nn.LayerNorm()
-            self.position_weight = self.params.get_constant('const',
-                                                            _position_encoding_init(max_length,
-                                                                                    units))
-            ## !!! Original code creates a number of attention layers
-            ## !!! Hard-coded here for a single base encoder cell for simplicity
+            # self.position_weight = self.params.get_constant('const',
+            #                                                 _position_encoding_init(max_length,
+            #                                                                         units))
             self.transformer_cells = nn.HybridSequential()
             with self.transformer_cells.name_scope():
                 for i in range(num_layers):
@@ -282,10 +294,10 @@ class BaseEncoder(HybridBlock):
                                                                output_attention=output_attention,
                                                                prefix=f'transformer{i}'))
 
-    def __call__(self, inputs):  # pylint: disable=arguments-differ
-        return super(BaseEncoder, self).__call__(inputs)
+    def __call__(self, query, key):  # pylint: disable=arguments-differ
+        return super(BaseEncoder, self).__call__(query, key)
 
-    def hybrid_forward(self, F, inputs, position_weight):  # pylint: disable=arguments-differ
+    def hybrid_forward(self, F, query, key):  # pylint: disable=arguments-differ
         """
 
         Parameters
@@ -298,15 +310,15 @@ class BaseEncoder(HybridBlock):
         outputs : NDArray or Symbol
             The output of the encoder. Shape is (batch_size, length, C_out)
         """
-        batch_size = inputs.shape[0]
-        steps = F.arange(self._max_length)
-        inputs = F.broadcast_add(inputs,
-                                 F.expand_dims(F.Embedding(steps,
-                                                           position_weight,
-                                                           self._max_length,
-                                                           self._units),
-                                               axis=0))
-        inputs = self.dropout_layer(inputs)
-        inputs = self.layer_norm(inputs)
-        outputs = self.transformer_cells(inputs)
+        batch_size = query.shape[0]
+        # steps = F.arange(self._max_length)
+        # inputs = F.broadcast_add(inputs,
+        #                          F.expand_dims(F.Embedding(steps,
+        #                                                    position_weight,
+        #                                                    self._max_length,
+        #                                                    self._units),
+        #                                        axis=0))
+        # inputs = self.dropout_layer(query)
+        # inputs = self.layer_norm(query)
+        outputs = self.transformer_cells(query, key)
         return outputs
