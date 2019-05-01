@@ -213,44 +213,14 @@ class BaseEncoderCell(HybridBlock):
             self.layer_norm = nn.LayerNorm()
 
     def hybrid_forward(self, F, query, key):  # pylint: disable=arguments-differ
-        # pylint: disable=unused-argument
-        """Transformer Encoder Attention Cell.
-
-        Parameters
-        ----------
-        inputs : Symbol or NDArray
-            Input sequence. Shape (batch_size, length, C_in)
-        arg_inputs: Symbol or NDArray
-            Input arguments. Shape (batch_size, 2)
-
-        Returns
-        -------
-        encoder_cell_outputs: list
-            Outputs of the encoder cell. Contains:
-
-            - outputs of the encoder cell. Shape (batch_size, 2, C_out)
-            - additional_outputs of all the transformer encoder cell
-        """
         # outputs has shape (batch_size, max_seq_len, units)
         # attention_weights has shape  (batch_size, 4, max_seq_len, max_seq_len)
         outputs, attention_weights = self.attention_cell(query, key, None, None)
         outputs = self.proj(outputs)  # shape (batch_size, max_seq_len, units)
         outputs = self.dropout_layer(outputs)  # shape (batch_size, max_seq_len, units)
-        # if self._use_residual:
-        #     outputs = outputs + inputs
         outputs = self.layer_norm(outputs)
         outputs = self.ffn(outputs)
         return outputs
-
-
-def _position_encoding_init(max_length, dim):
-    """ Init the sinusoid position encoding table """
-    position_enc = np.arange(max_length).reshape((-1, 1)) \
-                   / (np.power(10000, (2. / dim) * np.arange(dim).reshape((1, -1))))
-    # Apply the cosine to even columns and sin to odds.
-    position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
-    position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
-    return position_enc
 
 
 class BaseEncoder(HybridBlock):
@@ -276,9 +246,6 @@ class BaseEncoder(HybridBlock):
         with self.name_scope():
             self.dropout_layer = nn.Dropout(dropout)
             self.layer_norm = nn.LayerNorm()
-            # self.position_weight = self.params.get_constant('const',
-            #                                                 _position_encoding_init(max_length,
-            #                                                                         units))
             self.transformer_cells = nn.HybridSequential()
             with self.transformer_cells.name_scope():
                 for i in range(num_layers):
@@ -298,27 +265,5 @@ class BaseEncoder(HybridBlock):
         return super(BaseEncoder, self).__call__(query, key)
 
     def hybrid_forward(self, F, query, key):  # pylint: disable=arguments-differ
-        """
-
-        Parameters
-        ----------
-        inputs : NDArray or Symbol, Shape(batch_size, length, C_in)
-        arg_pos: int array pair
-
-        Returns
-        -------
-        outputs : NDArray or Symbol
-            The output of the encoder. Shape is (batch_size, length, C_out)
-        """
-        batch_size = query.shape[0]
-        # steps = F.arange(self._max_length)
-        # inputs = F.broadcast_add(inputs,
-        #                          F.expand_dims(F.Embedding(steps,
-        #                                                    position_weight,
-        #                                                    self._max_length,
-        #                                                    self._units),
-        #                                        axis=0))
-        # inputs = self.dropout_layer(query)
-        # inputs = self.layer_norm(query)
         outputs = self.transformer_cells(query, key)
         return outputs
