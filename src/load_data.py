@@ -105,8 +105,8 @@ def _preprocess(x: Instance, vocab: nlp.vocab):
     Outputs: data mapped to token IDs, with corresponding label
     """
     x.process_text(vocab)
-    answer_indices = mx.nd.array([a.start for a in x.answers])
-    return x.question_indices, x.context_indices, answer_indices
+    can_be_answered = int(not x.is_impossible)
+    return x.question_indices, x.context_indices, can_be_answered
 
 
 def preprocess_dataset(dataset: List[Instance], vocab: nlp.vocab):

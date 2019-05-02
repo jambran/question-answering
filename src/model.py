@@ -46,6 +46,18 @@ class QuestionAnsweringClassifier(HybridBlock):
                                                    bias_initializer='zeros',
                                                    prefix=None,
                                                    params=None)
+
+            # self.attention_transform = BaseEncoderCell(units=128,
+            #                                            hidden_size=2048,
+            #                                            num_heads=4,
+            #                                            attention_cell=attn_cell,
+            #                                            weight_initializer=None,
+            #                                            bias_initializer='zeros',
+            #                                            dropout=dropout,
+            #                                            use_residual=False,
+            #                                            scaled=True,
+            #                                            output_attention=False,
+            #                                            prefix=f'transformer')
             self.output = nn.HybridSequential()
             with self.output.name_scope():
                 self.output.add(nn.Dense(num_classes))
@@ -257,20 +269,6 @@ class BaseEncoder(HybridBlock):
                                                      scaled=scaled,
                                                      output_attention=output_attention,
                                                      prefix=f'transformer')
-            # self.transformer_cells = nn.HybridSequential()
-            # with self.transformer_cells.name_scope():
-            #     for i in range(num_layers):
-            #         self.transformer_cells.add(BaseEncoderCell(units=units,
-            #                                                    hidden_size=hidden_size,
-            #                                                    num_heads=num_heads,
-            #                                                    attention_cell=attention_cell,
-            #                                                    weight_initializer=weight_initializer,
-            #                                                    bias_initializer=bias_initializer,
-            #                                                    dropout=dropout,
-            #                                                    use_residual=use_residual,
-            #                                                    scaled=scaled,
-            #                                                    output_attention=output_attention,
-            #                                                    prefix=f'transformer{i}'))
 
     def __call__(self, query, key):  # pylint: disable=arguments-differ
         return super(BaseEncoder, self).__call__(query, key)

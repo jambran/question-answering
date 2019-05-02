@@ -69,7 +69,7 @@ def train_classifier(vocab, data_train, data_val, ctx=mx.cpu()):
 
     emb_input_dim, emb_output_dim = vocab.embedding.idx_to_vec.shape
 
-    num_classes = 60 #todo?
+    num_classes = 2
     model = QuestionAnsweringClassifier(emb_input_dim,
                                         emb_output_dim,
                                         num_classes=num_classes,
@@ -97,14 +97,14 @@ def train_classifier(vocab, data_train, data_val, ctx=mx.cpu()):
     for epoch in range(ARGS.epochs):
         epoch_loss = 0
         for i, instance in enumerate(train_dataloader):
-            question_indices, context_indices, answer_starts = instance
+            question_indices, context_indices, can_be_answered = instance
             question_indices = question_indices.as_in_context(ctx)
             context_indices = context_indices.as_in_context(ctx)
-            answer_starts = answer_starts.as_in_context(ctx)
+            can_be_answered = can_be_answered.as_in_context(ctx)
             with autograd.record():
                 # output shape should (batch_size, num_classes, maybe1?) maybe 2 dimensional
                 output = model(question_indices, context_indices)
-                l = LOSS_FN(output, answer_starts).mean()
+                l = LOSS_FN(output, can_be_answered).mean()
             l.backward()
             trainer.step(1)  ## step based on batch size
             epoch_loss += l.asscalar()
