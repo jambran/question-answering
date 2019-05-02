@@ -246,20 +246,31 @@ class BaseEncoder(HybridBlock):
         with self.name_scope():
             self.dropout_layer = nn.Dropout(dropout)
             self.layer_norm = nn.LayerNorm()
-            self.transformer_cells = nn.HybridSequential()
-            with self.transformer_cells.name_scope():
-                for i in range(num_layers):
-                    self.transformer_cells.add(BaseEncoderCell(units=units,
-                                                               hidden_size=hidden_size,
-                                                               num_heads=num_heads,
-                                                               attention_cell=attention_cell,
-                                                               weight_initializer=weight_initializer,
-                                                               bias_initializer=bias_initializer,
-                                                               dropout=dropout,
-                                                               use_residual=use_residual,
-                                                               scaled=scaled,
-                                                               output_attention=output_attention,
-                                                               prefix=f'transformer{i}'))
+            self.transformer_cells = BaseEncoderCell(units=units,
+                                                     hidden_size=hidden_size,
+                                                     num_heads=num_heads,
+                                                     attention_cell=attention_cell,
+                                                     weight_initializer=weight_initializer,
+                                                     bias_initializer=bias_initializer,
+                                                     dropout=dropout,
+                                                     use_residual=use_residual,
+                                                     scaled=scaled,
+                                                     output_attention=output_attention,
+                                                     prefix=f'transformer')
+            # self.transformer_cells = nn.HybridSequential()
+            # with self.transformer_cells.name_scope():
+            #     for i in range(num_layers):
+            #         self.transformer_cells.add(BaseEncoderCell(units=units,
+            #                                                    hidden_size=hidden_size,
+            #                                                    num_heads=num_heads,
+            #                                                    attention_cell=attention_cell,
+            #                                                    weight_initializer=weight_initializer,
+            #                                                    bias_initializer=bias_initializer,
+            #                                                    dropout=dropout,
+            #                                                    use_residual=use_residual,
+            #                                                    scaled=scaled,
+            #                                                    output_attention=output_attention,
+            #                                                    prefix=f'transformer{i}'))
 
     def __call__(self, query, key):  # pylint: disable=arguments-differ
         return super(BaseEncoder, self).__call__(query, key)
