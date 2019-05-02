@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os
+import pickle
 
 import mxnet as mx
 import numpy as np
@@ -22,7 +23,7 @@ def parse_args():
     parser.add_argument('--train_file', type=str, help='File containing file representing the input TRAINING data')
     parser.add_argument('--val_file', type=str, help='File containing file representing the input VALIDATION data',
                         default=None)
-    parser.add_argument('--epochs', type=int, default=10, help='Upper epoch limit')
+    parser.add_argument('--epochs', type=int, default=4, help='Upper epoch limit')
     parser.add_argument('--optimizer', type=str, help='Optimizer (adam, sgd, etc.)', default='adam')
     parser.add_argument('--lr', type=float, help='Learning rate', default=0.0001)
     parser.add_argument('--batch_size', type=int, help='Training batch size', default=16)
@@ -35,7 +36,6 @@ def parse_args():
                         help='Directory to hold all files pertaining to this experiment')
     parser.add_argument('--fixed_embedding', action='store_true', help='Fix the embedding layer weights')
     parser.add_argument('--random_embedding', action='store_true', help='Use random initialized embedding layer')
-    parser.add_argument('--num_layers', type=int, help='number of attention layers to use', default=6)
     parser.add_argument('--attn_cell', type=str, help='the type of attention cell to use', default='multi_head')
 
     return parser.parse_args()
@@ -73,7 +73,6 @@ def train_classifier(vocab, data_train, data_val, ctx=mx.cpu()):
     model = QuestionAnsweringClassifier(emb_input_dim,
                                         emb_output_dim,
                                         num_classes=num_classes,
-                                        num_layers=ARGS.num_layers,
                                         dropout=ARGS.dropout,
                                         attn_cell=ARGS.attn_cell)
 
@@ -175,3 +174,9 @@ if __name__ == '__main__':
     logger.info(f"Training the classifier using {ARGS.train_file}...")
     model = train_classifier(vocab, train_dataset, val_dataset, ctx)
     logger.info("Training completed successfully")
+
+    logger.info(f"Saving model..")
+    model_file = os.path.join(ARGS.exp_dir, 'model.pkl')
+    with open(model_file, 'wb') as f:
+        pickle.dump(model, f)
+    logger.info(f"Model saved here: {model_file}")

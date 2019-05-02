@@ -20,7 +20,7 @@ class QuestionAnsweringClassifier(HybridBlock):
     """
 
     def __init__(self, emb_input_dim, emb_output_dim, max_seq_len=32, num_classes=19,
-                 num_layers=6, dropout=.2, attn_cell='multi_head'):
+                 dropout=.2, attn_cell='multi_head'):
         super(QuestionAnsweringClassifier, self).__init__()
         with self.name_scope():
             self.embedding = nn.Embedding(emb_input_dim, emb_output_dim)
@@ -33,7 +33,6 @@ class QuestionAnsweringClassifier(HybridBlock):
                                            bidirectional=True,
                                            )
             self.attention_transform = BaseEncoder(attention_cell=attn_cell,
-                                                   num_layers=num_layers,
                                                    units=emb_output_dim,
                                                    hidden_size=2048,
                                                    max_length=max_seq_len,
@@ -81,6 +80,7 @@ class QuestionAnsweringClassifier(HybridBlock):
 
         # combine q_after_attn and c_after_attn in some way
         encoded = mx.ndarray.concat(q_after_attn, c_after_attn, dim=1)
+        logging.debug(f"shape of encoded {encoded.shape}")
 
         # output layer
         outputs = self.output(encoded)
@@ -240,7 +240,7 @@ class BaseEncoderCell(HybridBlock):
 
 class BaseEncoder(HybridBlock):
 
-    def __init__(self, attention_cell='multi_head', num_layers=6,
+    def __init__(self, attention_cell='multi_head',
                  units=512, hidden_size=2048, max_length=64,
                  num_heads=4, scaled=True, dropout=0.0,
                  use_residual=True, output_attention=False,
