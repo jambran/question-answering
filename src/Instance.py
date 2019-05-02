@@ -1,8 +1,13 @@
 import mxnet as mx
 
 
-def process_text(words, vocab):
+def process_text(words, vocab, max_len):
     indices = vocab[words]  ## map tokens (strings) to unique IDs
+    indices = indices[:max_len]  ## truncate to max_len
+    # pad if necessary
+    while len(indices) < max_len:
+        indices.append(vocab['<pad>'])
+    assert len(indices) == max_len
     return mx.nd.array(indices)
 
 
@@ -38,8 +43,8 @@ class Instance:
         :param max_len: the max padding length
         :return: None
         """
-        self.question_indices = process_text(self.question, vocab)
-        self.context_indices = process_text(self.context, vocab)
+        self.question_indices = process_text(self.question, vocab, max_len=40)
+        self.context_indices = process_text(self.context, vocab, max_len=300)
 
 
 class Answer:

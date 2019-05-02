@@ -154,8 +154,8 @@ if __name__ == '__main__':
     logger = logging.getLogger('train.py')
     utils.logging_config(folder=ARGS.log_dir,
                          name='train',
-                         level=logging.DEBUG,
-                         console_level=logging.DEBUG)
+                         level=logging.INFO,
+                         console_level=logging.INFO)
 
     logger.info("Beginning experiment:")
     utils.log_experiment_parameters(ARGS, logger)

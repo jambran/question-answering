@@ -58,29 +58,32 @@ class QuestionAnsweringClassifier(HybridBlock):
             #                                            scaled=True,
             #                                            output_attention=False,
             #                                            prefix=f'transformer')
-            self.output = nn.HybridSequential()
-            with self.output.name_scope():
-                self.output.add(nn.Dense(num_classes))
+            self.output = nn.Dense(num_classes)
 
     def hybrid_forward(self, F, question, context):
         # embedding layers for question and context
-        question_embedded = self.embedding(question)  ## shape (batch_size, max_len, emb_dim)
+        question_embedded = self.embedding(question)  ## shape (batch_size, question_len, emb_dim)
         context_embedded = self.embedding(context)
         logging.debug(f"shape of question after embedding {question_embedded.shape}")
         logging.debug(f"shape of context after embedding {context_embedded.shape}")
 
         # bilstm layers for question and context
-        question_after_lstm = self.bilstm_question(question_embedded)
+        question_after_lstm = self.bilstm_question(question_embedded)  # shape (batch_size, question_len,
         context_after_lstm = self.bilstm_context(context_embedded)
         logging.debug(f"shape of question after lstm {question_after_lstm.shape}")
         logging.debug(f"shape of context after lstm {context_after_lstm.shape}")
 
         # attention layer
-        after_attn = self.attention_transform(question_after_lstm, context_after_lstm)
-        logging.debug(f"shape of after_attn {after_attn.shape}")
+        q_after_attn = self.attention_transform(question_after_lstm, context_after_lstm)
+        c_after_attn = self.attention_transform(context_after_lstm, question_after_lstm)
+        logging.debug(f"shape of q_after_attn {q_after_attn.shape}")
+        logging.debug(f"shape of c_after_attn {c_after_attn.shape}")
+
+        # combine q_after_attn and c_after_attn in some way
+        encoded = mx.ndarray.concat(q_after_attn, c_after_attn, dim=1)
 
         # output layer
-        outputs = self.output(after_attn)
+        outputs = self.output(encoded)
         logging.debug(f"shape of outputs after output layer {outputs.shape}")
         return outputs
 
@@ -256,8 +259,8 @@ class BaseEncoder(HybridBlock):
         self._use_residual = use_residual
         self._scaled = scaled
         with self.name_scope():
-            self.dropout_layer = nn.Dropout(dropout)
-            self.layer_norm = nn.LayerNorm()
+            # self.dropout_layer = nn.Dropout(dropout)
+            # self.layer_norm = nn.LayerNorm()
             self.transformer_cells = BaseEncoderCell(units=units,
                                                      hidden_size=hidden_size,
                                                      num_heads=num_heads,
