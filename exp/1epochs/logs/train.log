@@ -1,0 +1,20 @@
+2019-05-02 22:49:57,148 - train.py - Beginning experiment:
+2019-05-02 22:49:57,148 - train.py - 	          train_file = ../data/train-v2.0.json
+2019-05-02 22:49:57,148 - train.py - 	            val_file = ../data/dev-v2.0.json
+2019-05-02 22:49:57,148 - train.py - 	              epochs = 1
+2019-05-02 22:49:57,148 - train.py - 	           optimizer = adam
+2019-05-02 22:49:57,148 - train.py - 	                  lr = 0.0001
+2019-05-02 22:49:57,149 - train.py - 	          batch_size = 16
+2019-05-02 22:49:57,149 - train.py - 	             dropout = 0.5
+2019-05-02 22:49:57,149 - train.py - 	    embedding_source = glove.twitter.27B.100d
+2019-05-02 22:49:57,149 - train.py - 	             log_dir = ../exp/1epochs/logs
+2019-05-02 22:49:57,149 - train.py - 	             exp_dir = ../exp/1epochs
+2019-05-02 22:49:57,149 - train.py - 	     fixed_embedding = False
+2019-05-02 22:49:57,149 - train.py - 	    random_embedding = False
+2019-05-02 22:49:57,149 - train.py - 	           attn_cell = multi_head
+2019-05-02 22:49:57,154 - train.py - Using CPU
+2019-05-02 22:49:57,154 - train.py - Loading in the dataset...
+2019-05-02 22:50:00,566 - root - Loading pre-trained token embedding vectors from C:\Users\jamie\.mxnet\embedding\glove\glove.twitter.27B.100d.npz
+2019-05-02 22:50:14,608 - train.py - Data loaded in successfully
+2019-05-02 22:50:14,608 - train.py - Training the classifier using ../data/train-v2.0.json...
+2019-05-02 22:50:14,623 - train.py -        Epoch      Train loss  Train Acc    Val Acc

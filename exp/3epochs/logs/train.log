@@ -1,0 +1,44 @@
+2019-05-03 09:08:12,013 - train.py - Beginning experiment:
+2019-05-03 09:08:12,014 - train.py - 	          train_file = ../data/train-v2.0.json
+2019-05-03 09:08:12,014 - train.py - 	            val_file = ../data/dev-v2.0.json
+2019-05-03 09:08:12,014 - train.py - 	              epochs = 3
+2019-05-03 09:08:12,014 - train.py - 	           optimizer = adam
+2019-05-03 09:08:12,014 - train.py - 	                  lr = 0.0001
+2019-05-03 09:08:12,014 - train.py - 	          batch_size = 16
+2019-05-03 09:08:12,015 - train.py - 	             dropout = 0.5
+2019-05-03 09:08:12,015 - train.py - 	    embedding_source = glove.twitter.27B.100d
+2019-05-03 09:08:12,015 - train.py - 	             log_dir = ../exp/3epochs/logs
+2019-05-03 09:08:12,015 - train.py - 	             exp_dir = ../exp/3epochs
+2019-05-03 09:08:12,015 - train.py - 	     fixed_embedding = False
+2019-05-03 09:08:12,015 - train.py - 	    random_embedding = False
+2019-05-03 09:08:12,015 - train.py - 	           attn_cell = multi_head
+2019-05-03 09:08:12,015 - train.py - 	          data_limit = 10000
+2019-05-03 09:08:12,020 - train.py - Using CPU
+2019-05-03 09:08:12,020 - train.py - Loading in the dataset...
+2019-05-03 09:08:16,332 - root - Loading pre-trained token embedding vectors from C:\Users\jamie\.mxnet\embedding\glove\glove.twitter.27B.100d.npz
+2019-05-03 09:08:35,115 - train.py - Data loaded in successfully
+2019-05-03 09:08:35,116 - train.py - Training the classifier using ../data/train-v2.0.json...
+2019-05-03 09:08:35,126 - train.py -        Epoch      Train loss  Train Acc    Val Acc
+2019-05-03 16:06:47,893 - train.py -            0        377.6983     0.8188     0.4976
+2019-05-04 00:12:17,528 - train.py -            1        280.7023     0.8438     0.4988
+2019-05-04 07:08:19,574 - train.py -            2        207.3620     0.8322     0.4972
+2019-05-04 07:08:19,577 - train.py - Training completed successfully
+2019-05-04 07:08:19,577 - train.py - Saving model..
+2019-05-04 07:08:40,728 - train.py - Model saved here: ../exp/3epochs\model.pkl
+2019-05-04 16:02:39,786 - train.py - Beginning experiment:
+2019-05-04 16:02:39,787 - train.py - 	          train_file = ../data/train-v2.0.json
+2019-05-04 16:02:39,787 - train.py - 	            val_file = ../data/dev-v2.0.json
+2019-05-04 16:02:39,787 - train.py - 	              epochs = 3
+2019-05-04 16:02:39,788 - train.py - 	           optimizer = adam
+2019-05-04 16:02:39,788 - train.py - 	                  lr = 0.0001
+2019-05-04 16:02:39,788 - train.py - 	          batch_size = 16
+2019-05-04 16:02:39,788 - train.py - 	             dropout = 0.5
+2019-05-04 16:02:39,788 - train.py - 	    embedding_source = glove.twitter.27B.100d
+2019-05-04 16:02:39,788 - train.py - 	             log_dir = ../exp/3epochs/logs
+2019-05-04 16:02:39,789 - train.py - 	             exp_dir = ../exp/3epochs
+2019-05-04 16:02:39,789 - train.py - 	     fixed_embedding = False
+2019-05-04 16:02:39,789 - train.py - 	    random_embedding = False
+2019-05-04 16:02:39,789 - train.py - 	           attn_cell = multi_head
+2019-05-04 16:02:39,789 - train.py - 	          data_limit = 10000
+2019-05-04 16:02:39,799 - train.py - Using CPU
+2019-05-04 16:02:39,799 - train.py - Loading in the dataset...
