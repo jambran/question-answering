@@ -16,22 +16,19 @@ from gluonnlp.model import AttentionCell, MLPAttentionCell, DotProductAttentionC
 
 class QuestionAnsweringClassifier(HybridBlock):
     """
-    Your primary model block for Bi-LSTM and attention model
+    Primary model block for Bi-LSTM and attention model
     """
-
-    def __init__(self, emb_input_dim, emb_output_dim, max_seq_len=32, num_classes=19,
-                 dropout=.2, attn_cell='multi_head'):
+    def __init__(self, emb_input_dim, emb_output_dim, num_classes,
+                 max_seq_len=32, dropout=.2, attn_cell='multi_head'):
         super(QuestionAnsweringClassifier, self).__init__()
         with self.name_scope():
             self.embedding = nn.Embedding(emb_input_dim, emb_output_dim)
             self.bilstm_question = rnn.LSTM(hidden_size=2048,
                                             dropout=dropout,
-                                            bidirectional=True,
-                                            )
+                                            bidirectional=True)
             self.bilstm_context = rnn.LSTM(hidden_size=2048,
                                            dropout=dropout,
-                                           bidirectional=True,
-                                           )
+                                           bidirectional=True)
             self.attention_transform = BaseEncoder(attention_cell=attn_cell,
                                                    units=emb_output_dim,
                                                    hidden_size=2048,
@@ -45,18 +42,6 @@ class QuestionAnsweringClassifier(HybridBlock):
                                                    bias_initializer='zeros',
                                                    prefix=None,
                                                    params=None)
-
-            # self.attention_transform = BaseEncoderCell(units=128,
-            #                                            hidden_size=2048,
-            #                                            num_heads=4,
-            #                                            attention_cell=attn_cell,
-            #                                            weight_initializer=None,
-            #                                            bias_initializer='zeros',
-            #                                            dropout=dropout,
-            #                                            use_residual=False,
-            #                                            scaled=True,
-            #                                            output_attention=False,
-            #                                            prefix=f'transformer')
             self.output = nn.Dense(num_classes)
 
     def hybrid_forward(self, F, question, context):

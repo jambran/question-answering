@@ -38,7 +38,8 @@ def load_json_to_array(data_file: str):
 
 def load_dataset(train_file: str,
                  val_file: str,
-                 source: str = None):
+                 source: str = None,
+                 data_limit: int = float("inf")):
     """
     load all data sets into memory
     :param train_file: json format SQuAD data set
@@ -47,8 +48,8 @@ def load_dataset(train_file: str,
     :param ctx: the CPU or GPU context
     :return:
     """
-    train_array = load_json_to_array(train_file)
-    val_array = load_json_to_array(val_file)
+    train_array = load_json_to_array(train_file)[:data_limit]
+    val_array = load_json_to_array(val_file)[:data_limit]
 
     vocabulary = build_vocabulary(train_array, val_array, source=source)
 

@@ -37,6 +37,7 @@ def parse_args():
     parser.add_argument('--fixed_embedding', action='store_true', help='Fix the embedding layer weights')
     parser.add_argument('--random_embedding', action='store_true', help='Use random initialized embedding layer')
     parser.add_argument('--attn_cell', type=str, help='the type of attention cell to use', default='multi_head')
+    parser.add_argument('--data_limit', type=int, help='Number of instances to include in training data', default=1000)
 
     return parser.parse_args()
 
@@ -139,15 +140,6 @@ def evaluate(model, dataloader, ctx=mx.cpu()):
     return acc
 
 
-def predict_on(dataloader, outfile, transform):
-    with open(outfile, 'w+') as f:
-        for i, (data, inds, label) in enumerate(dataloader):
-            out = model(data, inds)
-            predictions = mx.nd.argmax(out, axis=1).astype('int32')
-            labels = [transform._labels[pred] for pred in predictions.asnumpy()]
-            f.write('\n'.join(labels) + '\n')
-
-
 if __name__ == '__main__':
     ARGS = parse_args()
     logger = logging.getLogger('train.py')
@@ -168,7 +160,9 @@ if __name__ == '__main__':
     logger.info("Loading in the dataset...")
     vocab, train_dataset, val_dataset = load_dataset(train_file=ARGS.train_file,
                                                      val_file=ARGS.val_file,
-                                                     source=ARGS.embedding_source)
+                                                     source=ARGS.embedding_source,
+                                                     data_limit=ARGS.data_limit,
+                                                     )
     logger.info("Data loaded in successfully")
 
     logger.info(f"Training the classifier using {ARGS.train_file}...")
